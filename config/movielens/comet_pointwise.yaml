@@ -1,0 +1,73 @@
+# RUNTIME ==========
+seed: 42
+
+
+# DATA ==========
+data:
+  name: movielens
+  entity:
+    num_users: 609
+    num_items: 8452
+
+
+# MODEL ==========
+model:
+  name: comet
+  embedding_dim: 32
+  channels: 8
+  kernel_size: [1, 8, 32]
+  hidden_dim: [128, 32]
+  dropout: 0.2
+
+
+# PIPELINE PACKAGE ==========
+# STRATIFIED SPLITTER
+split:
+  ratio:
+    trn: 8
+    val: 1
+    tst: 1
+  min_rating: 1
+  filter_by: user
+# NEGATIVE SAMPLER
+negatives:
+  ratio:
+    optimize: 4
+    measure: 99
+# DATALOADER
+dataloader:
+  batch_size: 256
+  shuffle: True
+# USER, ITEM HIST DATA
+histories:
+  user:
+    selector: tfidf
+    max_hist: 50
+  item:
+    selector: tfidf
+    max_hist: 50
+
+
+# TRAINER PACKAGE ==========
+# TASK
+trainer:
+  strategy: pointwise
+  loss: bce
+  num_epochs: 100
+# OPT
+optimizer:
+  name: adamw
+  lr: 0.001
+  weight_decay: 0.00001
+# MONITOR
+monitor:
+  metric: ndcg
+  k: 10
+  delta: 0.001
+  patience: 5
+  warmup: 10
+
+
+# EVALUATOR PACKAGE ==========
+evaluator:
+  k: [5, 10, 15, 20, 25, 50]
